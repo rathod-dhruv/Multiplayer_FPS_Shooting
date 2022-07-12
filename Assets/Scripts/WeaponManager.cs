@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Photon.Pun;
+
 public class WeaponManager : MonoBehaviour
 {
 
@@ -53,6 +55,8 @@ public class WeaponManager : MonoBehaviour
 
     public PlayerManager playerManager;
 
+    public PhotonView photonView;
+
     private void OnEnable()
     {
         weaponAnimator.SetTrigger(WeaponType);
@@ -72,6 +76,10 @@ public class WeaponManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (PhotonNetwork.InRoom && !photonView.IsMine)
+        {
+            return;
+        }
 
         if (weaponAnimator.GetBool("isShooting"))
         {
@@ -196,12 +204,26 @@ public class WeaponManager : MonoBehaviour
             {
                 GameObject InstParticles = Instantiate(nonTargetHitParticles, hit.point, Quaternion.LookRotation(hit.normal));
                 Destroy(InstParticles, 5f);
-            }
-                
-
+            }   
         }
-        fireParticle.Play();
-        audioSource.PlayOneShot(gunShot);
+        
+        if(PhotonNetwork.InRoom)
+        {
+            photonView.RPC("WeaponShootVFX", RpcTarget.All, photonView.ViewID);
+        }
+        else
+        {
+            ShootVFX(photonView.ViewID);
+        }
+    }
+
+    public void ShootVFX(int viewID)
+    {
+        if(photonView.ViewID == viewID)
+        {
+            fireParticle.Play();
+            audioSource.PlayOneShot(gunShot);
+        }
     }
     private void OnDisable()
     {

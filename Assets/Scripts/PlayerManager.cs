@@ -1,10 +1,14 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerManager : MonoBehaviour
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+using Photon.Realtime;
+
+public class PlayerManager : MonoBehaviourPunCallbacks
 {
     public float health = 100;
     public float healthCap = 100;
@@ -27,6 +31,9 @@ public class PlayerManager : MonoBehaviour
     public float curPoints = 0;
     [SerializeField]
     private TextMeshProUGUI pointsText;
+
+    public PhotonView photonView;
+
     public void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
@@ -36,8 +43,14 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
+        if (PhotonNetwork.InRoom && !photonView.IsMine)
+        {
+            playerCamera.SetActive(false);
+            return;
+        }
 
-        if(hurtPanel.alpha > 0)
+
+        if (hurtPanel.alpha > 0)
         {
             hurtPanel.alpha -= Time.deltaTime;
         }
@@ -60,21 +73,36 @@ public class PlayerManager : MonoBehaviour
     }
     public void Hit(float damage)
     {
-        health -= damage;
-        gameManager.SetPlayerHealth(health);
-
-        if(health <= 0)
+        if(PhotonNetwork.InRoom)
         {
-            gameManager.EndGame();
+            photonView.RPC("TakeDamage", RpcTarget.All, damage, photonView.ViewID);
         }
         else
         {
-            shakeTime = 0;
-            shakeDuration = 0.2f;
-            hurtPanel.alpha = 1;
+            TakeDamage(damage, photonView.ViewID);
         }
     }
+    [PunRPC]
+    public void TakeDamage(float damage, int viewID)
+    {
+        if(photonView.ViewID == viewID)
+        {
+            health -= damage;
+            gameManager.SetPlayerHealth(health);
 
+            if (health <= 0)
+            {
+                gameManager.EndGame();
+            }
+            else
+            {
+                shakeTime = 0;
+                shakeDuration = 0.2f;
+                hurtPanel.alpha = 1;
+            }
+        }
+        
+    }
     public void CameraShake()
     {
         playerCamera.transform.localRotation = Quaternion.Euler(Random.Range(-2, 2), 0f, 0f);
@@ -106,6 +134,27 @@ public class PlayerManager : MonoBehaviour
         }
 
         activeWeaponIdx = weaponIdx;
+
+        if(photonView.IsMine)
+        {
+            Hashtable hash = new Hashtable();
+            hash.Add("weaponIndex", weaponIdx);
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+        }
     }
-    
+
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if(!photonView.IsMine && targetPlayer == photonView.Owner && changedProps["weaponIndex"] != null)
+        {
+            WeaponSwitch((int)changedProps["weaponIndex"]);
+        }
+    }
+
+    [PunRPC]
+    public void WeaponShootVFX(int viewID)
+    {
+        activeWeapon.GetComponent<WeaponManager>().ShootVFX(viewID);
+    }
 }

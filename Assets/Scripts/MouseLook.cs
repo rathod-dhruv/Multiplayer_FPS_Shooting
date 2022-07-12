@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,8 @@ public class MouseLook : MonoBehaviour
     private float xMax, xMin;
     [SerializeField]
     public bool isCursorLock;
+
+    public PhotonView photonView;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,6 +27,10 @@ public class MouseLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (PhotonNetwork.InRoom && !photonView.IsMine)
+        {
+            return;
+        }
         RotateView();
     }
 
