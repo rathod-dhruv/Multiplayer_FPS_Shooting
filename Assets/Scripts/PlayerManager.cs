@@ -113,7 +113,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
 
         int index = 0;
-        int amountOfWeapons = weaponHolder.transform.GetChildCount();
+        int amountOfWeapons = weaponHolder.transform.childCount;
 
         if(weaponIdx > amountOfWeapons - 1)
         {
@@ -127,6 +127,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             }
             if(index == weaponIdx)
             {
+                activeWeapon = child.gameObject;
                 child.gameObject.SetActive(true);
             }
 
@@ -157,4 +158,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         activeWeapon.GetComponent<WeaponManager>().ShootVFX(viewID);
     }
+
+
 }

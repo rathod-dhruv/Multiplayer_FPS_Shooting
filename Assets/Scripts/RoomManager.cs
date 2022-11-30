@@ -14,7 +14,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(Instance);
+        //DontDestroyOnLoad(Instance);
        
     }
     private void OnEnable()
@@ -34,14 +34,18 @@ public class RoomManager : MonoBehaviourPunCallbacks
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Vector3 spawnPoint = new Vector3(Random.Range(-3, 3), 2, Random.Range(-3, 3));
-
-        if(PhotonNetwork.InRoom)
+        if (SceneManager.GetActiveScene().name != "MainMenu")
         {
-            PhotonNetwork.Instantiate("First_Person_Player", spawnPoint, Quaternion.identity);
+            if (PhotonNetwork.InRoom)
+            {
+                PhotonNetwork.Instantiate("First_Person_Player", spawnPoint, Quaternion.identity);
+            }
+            else
+            {
+                Instantiate(Resources.Load("First_Person_Player"), spawnPoint, Quaternion.identity);
+            }
         }
-        else
-        {
-            Instantiate(Resources.Load("First_Person_Player"), spawnPoint, Quaternion.identity);
-        }
+       
+           
     }
 }

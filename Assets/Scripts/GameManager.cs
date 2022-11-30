@@ -53,12 +53,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             PauseGame();
         }
+
+        
     }
 
     public void NextWave(int round)
     {
         for(int i = 0; i < round; i++)
         {
+            Debug.Log("Length Spawn Points : " + spawnPoints.Length);
+            Debug.Log(spawnPoints[Random.Range(0, spawnPoints.Length)]);
             Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)].transform;
             GameObject enemySpawned;
             if(PhotonNetwork.InRoom)
@@ -90,10 +94,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (gameOverScreen.activeSelf)
             return;
-        if(!PhotonNetwork.InRoom)
+        /*if(!PhotonNetwork.InRoom)
         {
             Time.timeScale = 0;
-        }
+        }*/
+        Time.timeScale = 0;
         Cursor.lockState = CursorLockMode.None;
         gameOverScreen.SetActive(true);
         
@@ -111,10 +116,11 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void PauseGame()
     {
-        if (!PhotonNetwork.InRoom)
+        /*if (!PhotonNetwork.InRoom)
         {
             Time.timeScale = 0;
-        }
+        }*/
+        Time.timeScale = 0;
         Cursor.lockState = CursorLockMode.None;
         pauseScreen.SetActive(true);
 
@@ -126,6 +132,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Time.timeScale = 1;
         }
+        Time.timeScale = 1;
         Cursor.lockState = CursorLockMode.Locked;
         pauseScreen.SetActive(false);
     }

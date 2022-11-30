@@ -48,7 +48,7 @@ public class EnemyManager : MonoBehaviour
         {
             return;
         }
-        navAgent = player.GetComponent<NavMeshAgent>();
+        navAgent = GetComponent<NavMeshAgent>();
         navAgent.destination = player.transform.position;
         slider.transform.LookAt(player.transform);
         if(navAgent.velocity.magnitude > 1)
